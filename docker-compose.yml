@@ -9,7 +9,7 @@ services:
       - ./data:/app/data
     environment:
       - SERVER_PORT=9090
-      - JWT_SECRET=change-me-to-a-random-string
+      - JWT_SECRET=sos-call-production-secret-2024-change-this
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:9090/api/health"]
       interval: 30s

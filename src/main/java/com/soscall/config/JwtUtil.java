@@ -6,7 +6,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.util.Date;
 
 @Component
@@ -17,8 +19,20 @@ public class JwtUtil {
 
     public JwtUtil(@Value("${app.jwt.secret}") String secret,
                    @Value("${app.jwt.expiration}") long expiration) {
-        this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        // SHA-256 hash the secret to always get a 32-byte key (compatible with HS256)
+        this.key = deriveKey(secret);
         this.expiration = expiration;
+    }
+
+    private SecretKey deriveKey(String secret) {
+        try {
+            MessageDigest sha = MessageDigest.getInstance("SHA-256");
+            byte[] hash = sha.digest(secret.getBytes(StandardCharsets.UTF_8));
+            return new SecretKeySpec(hash, "HmacSHA256");
+        } catch (Exception e) {
+            // Never happens (SHA-256 is built-in)
+            return Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+        }
     }
 
     public String generateToken(String userId) {
@@ -29,7 +43,7 @@ public class JwtUtil {
                 .subject(userId)
                 .issuedAt(now)
                 .expiration(expiryDate)
-                .signWith(key)
+                .signWith(key, Jwts.SIG.HS256)
                 .compact();
     }
 
