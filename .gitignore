@@ -1,0 +1,15 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# IDE
+.idea/
+*.iml
+*.iws
+
+# Firebase secrets
+src/main/resources/serviceAccountKey.json
+
+# Data
+data/
+*.db
